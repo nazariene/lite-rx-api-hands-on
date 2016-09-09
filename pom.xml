@@ -46,8 +46,6 @@
 		  <id>spring-snapshot-repository</id>
 		  <url>http://repo.spring.io/snapshot</url>
 		</repository>
-	  </repositories>
-	<repositories>
 		<repository>
 		  <id>spring-milestone-repository</id>
 		  <url>http://repo.spring.io/milestone</url>
