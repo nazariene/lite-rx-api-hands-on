@@ -7,6 +7,9 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import io.pivotal.literx.test.TestSubscriber;
+import reactor.util.function.Tuple2;
+
+import java.util.function.Consumer;
 
 /**
  * Learn how to use various other operators.
@@ -21,6 +24,21 @@ public class Part06OtherOperations {
 //========================================================================================
 
 	@Test
+	public void testZipDifferentLength() {
+
+		Flux<String> usernameFlux = Flux.just(User.SKYLER.getUsername(), User.JESSE.getUsername(), User.WALTER.getUsername(), User.SAUL.getUsername());
+		Flux<String> firstnameFlux = Flux.just(User.SKYLER.getFirstname(), User.JESSE.getFirstname(), User.WALTER.getFirstname());
+		Flux<Tuple2<String, String>> resultFlux = Flux.zip(usernameFlux, firstnameFlux).doOnNext(s -> System.out.println(s.getT1() + s.getT2()));
+
+		resultFlux.subscribe(new Consumer<Tuple2<String, String>>() {
+			@Override
+			public void accept(Tuple2<String, String> stringStringTuple2) {
+				System.out.println(stringStringTuple2.getT1() + stringStringTuple2.getT2());
+			}
+		});
+
+	}
+	@Test
 	public void zipFirstNameAndLastName() {
 		Flux<String> usernameFlux = Flux.just(User.SKYLER.getUsername(), User.JESSE.getUsername(), User.WALTER.getUsername(), User.SAUL.getUsername());
 		Flux<String> firstnameFlux = Flux.just(User.SKYLER.getFirstname(), User.JESSE.getFirstname(), User.WALTER.getFirstname(), User.SAUL.getFirstname());
@@ -33,7 +51,8 @@ public class Part06OtherOperations {
 
 	// TODO Create a Flux of user from Flux of username, firstname and lastname.
 	Flux<User> userFluxFromStringFlux(Flux<String> usernameFlux, Flux<String> firstnameFlux, Flux<String> lastnameFlux) {
-		return null;
+		return Flux.zip(usernameFlux, firstnameFlux, lastnameFlux)
+				.map(tuple -> new User(tuple.getT1(), tuple.getT2(), tuple.getT3()));
 	}
 
 //========================================================================================
@@ -61,7 +80,7 @@ public class Part06OtherOperations {
 
 	// TODO return the mono which returns faster its value
 	Mono<User> useFastestMono(Mono<User> mono1, Mono<User> mono2) {
-		return null;
+		return Mono.first(mono1, mono2);
 	}
 
 //========================================================================================
@@ -89,7 +108,7 @@ public class Part06OtherOperations {
 
 	// TODO return the flux which returns faster the first value
 	Flux<User> useFastestFlux(Flux<User> flux1, Flux<User> flux2) {
-		return null;
+		return Flux.firstEmitting(flux1, flux2);
 	}
 
 //========================================================================================
@@ -108,7 +127,7 @@ public class Part06OtherOperations {
 
 	// TODO Convert the input Flux<User> to a Mono<Void> that represents the complete signal of the flux
 	Mono<Void> endOfFlux(Flux<User> flux) {
-		return null;
+		return flux.then();
 	}
 
 //========================================================================================
@@ -130,7 +149,7 @@ public class Part06OtherOperations {
 
 	// TODO Return a Mono<User> containing Saul when an error occurs in the input Mono, else do not change the input Mono.
 	Mono<User> betterCallSaulForBogusMono(Mono<User> mono) {
-		return null;
+		return mono.otherwise(s -> Mono.just(User.SAUL));
 	}
 
 //========================================================================================
@@ -152,7 +171,7 @@ public class Part06OtherOperations {
 
 	// TODO Return a Flux<User> containing Saul when an error occurs in the input Flux, else do not change the input Flux.
 	Flux<User> betterCallSaulForBogusFlux(Flux<User> flux) {
-		return null;
+		return flux.onErrorResumeWith(s -> Flux.just(User.SAUL));
 	}
 
 }
